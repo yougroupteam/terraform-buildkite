@@ -1,6 +1,7 @@
 package buildkite
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -30,6 +31,18 @@ func (c *Client) Get(pathParts []string, resBody interface{}) error {
 	return c.doJSON("GET", pathParts, nil, resBody)
 }
 
+func (c *Client) Post(pathParts []string, reqBody, resBody interface{}) error {
+	return c.doJSON("POST", pathParts, reqBody, resBody)
+}
+
+func (c *Client) Put(pathParts []string, reqBody, resBody interface{}) error {
+	return c.doJSON("PUT", pathParts, reqBody, resBody)
+}
+
+func (c *Client) Delete(pathParts []string) error {
+	return c.doJSON("DELETE", pathParts, nil, nil)
+}
+
 func (c *Client) createRawRequest(method string, pathParts []string, reqBodyBytes []byte) *http.Request {
 	urlPath := &url.URL{
 		Path: strings.Join(pathParts, "/"),
@@ -41,7 +54,13 @@ func (c *Client) createRawRequest(method string, pathParts []string, reqBodyByte
 		Header: http.Header{},
 		URL:    reqURL,
 	}
+	req.Header.Add("User-Agent", "Terraform-Buildkite")
 	req.Header.Add("Authorization", "Bearer "+c.apiToken)
+
+	if reqBodyBytes != nil {
+		req.Body = ioutil.NopCloser(bytes.NewReader(reqBodyBytes))
+		req.ContentLength = int64(len(reqBodyBytes))
+	}
 
 	return req
 }
@@ -67,9 +86,13 @@ func (c *Client) doRaw(req *http.Request) ([]byte, error) {
 }
 
 func (c *Client) doJSON(method string, pathParts []string, reqBody, resBody interface{}) error {
-	reqBodyBytes, err := json.Marshal(reqBody)
-	if err != nil {
-		return err
+	var reqBodyBytes []byte
+	var err error
+	if resBody != nil {
+		reqBodyBytes, err = json.Marshal(reqBody)
+		if err != nil {
+			return err
+		}
 	}
 
 	req := c.createRawRequest(method, pathParts, reqBodyBytes)
@@ -79,5 +102,9 @@ func (c *Client) doJSON(method string, pathParts []string, reqBody, resBody inte
 		return err
 	}
 
-	return json.Unmarshal(resBodyBytes, resBody)
+	if resBody != nil {
+		return json.Unmarshal(resBodyBytes, resBody)
+	} else {
+		return nil
+	}
 }

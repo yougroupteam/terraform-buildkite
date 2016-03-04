@@ -8,14 +8,14 @@ import (
 func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
 		ResourcesMap: map[string]*schema.Resource{
-			//"buildkite_pipeline": resourcePipeline(),
+			"buildkite_pipeline": resourcePipeline(),
 		},
 
 		Schema: map[string]*schema.Schema{
-			"organization_url": &schema.Schema{
+			"organization": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
-				DefaultFunc: schema.EnvDefaultFunc("BEANSTALK_ORG_URL", nil),
+				DefaultFunc: schema.EnvDefaultFunc("BUILDKITE_ORGANIZATION", nil),
 			},
 			"api_token": &schema.Schema{
 				Type:        schema.TypeString,
