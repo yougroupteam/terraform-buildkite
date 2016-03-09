@@ -1,6 +1,8 @@
 package buildkite
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
 )
@@ -29,5 +31,9 @@ func Provider() terraform.ResourceProvider {
 }
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
-	return nil, nil
+	orgName := d.Get("organization").(string)
+	apiToken := d.Get("api_token").(string)
+
+	orgURLStr := fmt.Sprintf("https://api.buildkite.com/v2/organizations/%s/", orgName)
+	return NewClient(orgURLStr, apiToken)
 }
