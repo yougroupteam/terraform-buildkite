@@ -138,13 +138,6 @@ func ReadPipeline(d *schema.ResourceData, meta interface{}) error {
 }
 
 func UpdatePipeline(d *schema.ResourceData, meta interface{}) error {
-	// Buildkite apparently lacks an update API endpoint. I've contacted
-	// them to see what the deal is with that, but for now we'll just
-	// fail here.
-	return fmt.Errorf(
-		"Buildkite does not currently support updates. To continue, make this change manually in the Buildkite UI.",
-	)
-
 	client := meta.(*Client)
 	slug := d.Id()
 
