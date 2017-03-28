@@ -51,3 +51,11 @@ resource "buildkite_pipeline" "terraform_test" {
   ]
 }
 ```
+
+## Importing existing pipelines
+
+You can import existing pipeline definitions by their slug:
+
+```bash
+terraform import buildkite_pipeline.my_name my-pipeline-slug
+```
