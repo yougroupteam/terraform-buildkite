@@ -10,6 +10,9 @@ func resourcePipeline() *schema.Resource {
 		Read:   ReadPipeline,
 		Update: UpdatePipeline,
 		Delete: DeletePipeline,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"id": &schema.Schema{
