@@ -33,6 +33,10 @@ func resourcePipeline() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"description": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"repository": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
@@ -80,13 +84,14 @@ func resourcePipeline() *schema.Resource {
 }
 
 type Pipeline struct {
-	Id         string `json:"id,omitempty"`
-	Slug       string `json:"slug,omitempty"`
-	WebURL     string `json:"web_url,omitempty"`
-	BuildsURL  string `json:"builds_url,omitempty"`
-	Repository string `json:"repository,omitempty"`
-	Name       string `json:"name,omitempty"`
-	Steps      []Step `json:"steps"`
+	Id          string `json:"id,omitempty"`
+	Slug        string `json:"slug,omitempty"`
+	WebURL      string `json:"web_url,omitempty"`
+	BuildsURL   string `json:"builds_url,omitempty"`
+	Repository  string `json:"repository,omitempty"`
+	Name        string `json:"name,omitempty"`
+	Description string `json:"description,omitempty"`
+	Steps       []Step `json:"steps"`
 }
 
 type Step struct {
@@ -164,6 +169,7 @@ func updatePipelineFromAPI(d *schema.ResourceData, p *Pipeline) {
 	d.SetId(p.Slug)
 	d.Set("id", p.Id)
 	d.Set("name", p.Name)
+	d.Set("description", p.Description)
 	d.Set("repository", p.Repository)
 	d.Set("web_url", p.WebURL)
 	d.Set("slug", p.Slug)
@@ -174,6 +180,7 @@ func preparePipelineRequestPayload(d *schema.ResourceData) *Pipeline {
 	req := &Pipeline{}
 
 	req.Name = d.Get("name").(string)
+	req.Description = d.Get("description").(string)
 	req.Slug = d.Get("slug").(string)
 	req.Repository = d.Get("repository").(string)
 	stepsI := d.Get("step").([]interface{})
