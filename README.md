@@ -62,6 +62,23 @@ terraform import buildkite_pipeline.my_name my-pipeline-slug
 
 ## Local development of this provider
 
-* Temporarily change `"github.com/saymedia/terraform-buildkite/buildkite"` in `./terraform-provider-buildkite/main.go` to `"../buildkite"`.
-* Build your local fork with: `cd ./terraform-provider-buildkite && go build -o terraform-provider-buildkite` and then run terraform from that directory (for more options see `Installation` section).
-* You can see debug output via `TF_LOG=DEBUG terraform plan`
+To do local development you will most likely be working in a Github fork of the repository. After creating your fork
+you can add it as a remote on your local repository in GOPATH:
+
+* `cd $GOPATH/src/github.com/saymedia/terraform-buildkite`
+* `git remote add mine git@github.com:yourname/terraform-buildkite`
+* `git checkout -b yourbranch`
+* `git push -u mine yourbranch`
+
+After this you should be able to `git push` to your fork, and eventually open a PR if you like.
+
+You can build like this:
+
+* `go install github.com/saymedia/terraform-buildkite/terraform-provider-buildkite`
+
+This should produce a file at `$GOPATH/bin/terraform-provider-buildkite`. To use this with Terraform you'll need to either move
+that binary to the same directory where `terraform` lives or
+[create a `.terraformrc` file](https://www.terraform.io/docs/plugins/basics.html#installing-a-plugin) to help Terraform find
+this file.
+
+You can see debug output via `TF_LOG=DEBUG terraform plan`
