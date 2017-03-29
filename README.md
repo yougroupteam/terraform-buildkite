@@ -59,3 +59,9 @@ You can import existing pipeline definitions by their slug:
 ```bash
 terraform import buildkite_pipeline.my_name my-pipeline-slug
 ```
+
+## Local development of this provider
+
+* Temporarily change `"github.com/saymedia/terraform-buildkite/buildkite"` in `./terraform-provider-buildkite/main.go` to `"../buildkite"`.
+* Build your local fork with: `cd ./terraform-provider-buildkite && go build -o terraform-provider-buildkite` and then run terraform from that directory (for more options see `Installation` section).
+* You can see debug output via `TF_LOG=DEBUG terraform plan`
