@@ -17,10 +17,6 @@ func resourcePipeline() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"id": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"slug": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
@@ -162,7 +158,6 @@ type Pipeline struct {
 }
 
 type BuildkiteProvider struct {
-	Id         string                 `json:"id"`
 	Settings   map[string]interface{} `json:"settings"`
 	WebhookURL string                 `json:"webhook_url"`
 }
@@ -251,7 +246,6 @@ func DeletePipeline(d *schema.ResourceData, meta interface{}) error {
 
 func updatePipelineFromAPI(d *schema.ResourceData, p *Pipeline) {
 	d.SetId(p.Slug)
-	d.Set("id", p.Id)
 	d.Set("env", p.Environment)
 	d.Set("name", p.Name)
 	d.Set("description", p.Description)
