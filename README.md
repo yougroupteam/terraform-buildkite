@@ -11,17 +11,7 @@ go install github.com/saymedia/terraform-buildkite/terraform-provider-buildkite
 ```
 Which gives you a `terraform-provider-buildkite` in `$GOPATH/bin`.
 
-Fom there you have a couple different options for installing that so Terraform can find it:
-
-* Put it in the same directory as the terraform program itself.
-* [Create a `.terraformrc` file](https://www.terraform.io/docs/plugins/basics.html#installing-a-plugin) in your home directory (or, in CI, the home directory of whatever user runs terraform) that tells Terraform where to find the program.
-As an example of the latter:
-
-```terraform
-providers {
-  buildkite = "/usr/local/bin/terraform-providers-buildkite"
-}
-```
+[Add the provider to the plugin search path](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins) in your home directory (or, in CI, the home directory of whatever user runs terraform). You'll need to make sure the program conforms to the plugin naming convention noted in the Terraform documentation linked above. (eg: terraform-provider-buildkite_vX.Y.Z)
 
 ## Usage
 
@@ -76,9 +66,6 @@ You can build like this:
 
 * `go install github.com/saymedia/terraform-buildkite/terraform-provider-buildkite`
 
-This should produce a file at `$GOPATH/bin/terraform-provider-buildkite`. To use this with Terraform you'll need to either move
-that binary to the same directory where `terraform` lives or
-[create a `.terraformrc` file](https://www.terraform.io/docs/plugins/basics.html#installing-a-plugin) to help Terraform find
-this file.
+This should produce a file at `$GOPATH/bin/terraform-provider-buildkite`. To use this with Terraform you'll need to move that binary to the [third-party plugins direcory](https://www.terraform.io/docs/plugins/basics.html#installing-a-plugin) to help Terraform find this file.
 
 You can see debug output via `TF_LOG=DEBUG terraform plan`
