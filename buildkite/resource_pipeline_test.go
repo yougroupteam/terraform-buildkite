@@ -37,7 +37,6 @@ const testAccPipeline_basic = `
 resource "buildkite_pipeline" "test" {
   name = "tf-acc-basic"
   repository = "git@github.com:saymedia/terraform-provider-buildkite.git"
-  default_branch = "master"
 
   step {
     type = "script"

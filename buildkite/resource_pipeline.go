@@ -61,6 +61,7 @@ func resourcePipeline() *schema.Resource {
 			"default_branch": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
+				Default:  "master",
 			},
 			"env": &schema.Schema{
 				Type:     schema.TypeMap,
