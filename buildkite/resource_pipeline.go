@@ -247,6 +247,8 @@ func DeletePipeline(d *schema.ResourceData, meta interface{}) error {
 
 func updatePipelineFromAPI(d *schema.ResourceData, p *Pipeline) {
 	d.SetId(p.Slug)
+	log.Printf("[INFO] Pipeline ID: %s", d.Id())
+
 	d.Set("env", p.Environment)
 	d.Set("name", p.Name)
 	d.Set("description", p.Description)
