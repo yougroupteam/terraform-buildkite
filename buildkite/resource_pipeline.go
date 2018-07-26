@@ -274,7 +274,10 @@ func (p *repositoryProvider) UnmarshalJSON(data []byte) error {
 	}
 
 	p.RepositoryProviderId = provider["id"].(string)
-	p.WebhookURL = provider["id"].(string)
+	webhook, ok := provider["webhook_url"]
+	if ok {
+		p.WebhookURL = webhook.(string)
+	}
 
 	settings := provider["settings"].(map[string]interface{})
 

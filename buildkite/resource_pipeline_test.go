@@ -2,11 +2,14 @@ package buildkite
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 )
+
+var webhookRegexp = regexp.MustCompile("^https://webhook.buildkite.com/deliver/[a-zA-Z0-9]+$")
 
 func TestAccPipeline_basic_unknown(t *testing.T) {
 	resource.Test(t, resource.TestCase{
@@ -38,6 +41,7 @@ func TestAccPipeline_basic_beanstalk(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBuildkitePipelineBasicAttributesFactory("beanstalk"),
 					resource.TestCheckResourceAttrSet("buildkite_pipeline.test_beanstalk", "webhook_url"),
+					resource.TestMatchResourceAttr("buildkite_pipeline.test_beanstalk", "webhook_url", webhookRegexp),
 					resource.TestCheckResourceAttr("buildkite_pipeline.test_beanstalk", "github_settings.#", "0"),
 					resource.TestCheckResourceAttr("buildkite_pipeline.test_beanstalk", "bitbucket_settings.#", "0"),
 				),
@@ -57,6 +61,7 @@ func TestAccPipeline_basic_github(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBuildkitePipelineBasicAttributesFactory("github"),
 					resource.TestCheckResourceAttrSet("buildkite_pipeline.test_github", "webhook_url"),
+					resource.TestMatchResourceAttr("buildkite_pipeline.test_github", "webhook_url", webhookRegexp),
 					resource.TestCheckResourceAttr("buildkite_pipeline.test_github", "github_settings.#", "1"),
 					resource.TestCheckResourceAttr("buildkite_pipeline.test_github", "github_settings.0.build_pull_request_forks", "false"),
 					resource.TestCheckResourceAttr("buildkite_pipeline.test_github", "github_settings.0.build_pull_requests", "true"),
@@ -87,6 +92,7 @@ func TestAccPipeline_basic_bitbucket(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBuildkitePipelineBasicAttributesFactory("bitbucket"),
 					resource.TestCheckResourceAttrSet("buildkite_pipeline.test_bitbucket", "webhook_url"),
+					resource.TestMatchResourceAttr("buildkite_pipeline.test_bitbucket", "webhook_url", webhookRegexp),
 					resource.TestCheckResourceAttr("buildkite_pipeline.test_bitbucket", "bitbucket_settings.#", "1"),
 					resource.TestCheckResourceAttr("buildkite_pipeline.test_bitbucket", "bitbucket_settings.0.build_pull_requests", "true"),
 					resource.TestCheckResourceAttr("buildkite_pipeline.test_bitbucket", "bitbucket_settings.0.build_tags", "false"),
@@ -113,6 +119,7 @@ func TestAccPipeline_basic_gitlab(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBuildkitePipelineBasicAttributesFactory("gitlab"),
 					resource.TestCheckResourceAttrSet("buildkite_pipeline.test_gitlab", "webhook_url"),
+					resource.TestMatchResourceAttr("buildkite_pipeline.test_gitlab", "webhook_url", webhookRegexp),
 					resource.TestCheckResourceAttr("buildkite_pipeline.test_gitlab", "github_settings.#", "0"),
 					resource.TestCheckResourceAttr("buildkite_pipeline.test_gitlab", "bitbucket_settings.#", "0"),
 				),
