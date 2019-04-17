@@ -1,6 +1,8 @@
 package buildkite
 
 import (
+	"encoding/json"
+	"fmt"
 	"log"
 
 	"github.com/hashicorp/terraform/helper/schema"
@@ -70,13 +72,6 @@ func resourcePipeline() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			"provider_settings": &schema.Schema{
-				Type:     schema.TypeMap,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
 			"webhook_url": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
@@ -135,32 +130,164 @@ func resourcePipeline() *schema.Resource {
 					},
 				},
 			},
+			"bitbucket_settings": &schema.Schema{
+				Type:          schema.TypeList,
+				Optional:      true,
+				Computed:      true,
+				MaxItems:      1,
+				ConflictsWith: []string{"github_settings"},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"build_pull_requests": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  true,
+						},
+						"pull_request_branch_filter_enabled": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+						"pull_request_branch_filter_configuration": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"skip_pull_request_builds_for_existing_commits": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  true,
+						},
+						"build_tags": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+						"publish_commit_status": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  true,
+						},
+						"publish_commit_status_per_step": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+					},
+				},
+			},
+			"github_settings": &schema.Schema{
+				Type:          schema.TypeList,
+				Optional:      true,
+				Computed:      true,
+				MaxItems:      1,
+				ConflictsWith: []string{"bitbucket_settings"},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"trigger_mode": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"build_pull_requests": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						"pull_request_branch_filter_enabled": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						"pull_request_branch_filter_configuration": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"skip_pull_request_builds_for_existing_commits": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						"build_pull_request_forks": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						"prefix_pull_request_fork_branch_names": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						"build_tags": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						"publish_commit_status": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						"publish_commit_status_per_step": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						"publish_blocked_as_pending": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+					},
+				},
+			},
 		},
 	}
 }
 
 type Pipeline struct {
-	Id                  string            `json:"id,omitempty"`
-	Environment         map[string]string `json:"env,omitempty"`
-	Slug                string            `json:"slug,omitempty"`
-	WebURL              string            `json:"web_url,omitempty"`
-	BuildsURL           string            `json:"builds_url,omitempty"`
-	Url                 string            `json:"url,omitempty"`
-	DefaultBranch       string            `json:"default_branch,omitempty"`
-	BadgeURL            string            `json:"badge_url,omitempty"`
-	CreatedAt           string            `json:"created_at,omitempty"`
-	Repository          string            `json:"repository,omitempty"`
-	Name                string            `json:"name,omitempty"`
-	Description         string            `json:"description,omitempty"`
-	BranchConfiguration string            `json:"branch_configuration,omitempty"`
-	Provider            BuildkiteProvider `json:"provider,omitempty"`
-	ProviderSettings    map[string]string `json:"provider_settings,omitempty"`
-	Steps               []Step            `json:"steps"`
+	Id                  string                 `json:"id,omitempty"`
+	Environment         map[string]string      `json:"env,omitempty"`
+	Slug                string                 `json:"slug,omitempty"`
+	WebURL              string                 `json:"web_url,omitempty"`
+	BuildsURL           string                 `json:"builds_url,omitempty"`
+	Url                 string                 `json:"url,omitempty"`
+	DefaultBranch       string                 `json:"default_branch,omitempty"`
+	BadgeURL            string                 `json:"badge_url,omitempty"`
+	CreatedAt           string                 `json:"created_at,omitempty"`
+	Repository          string                 `json:"repository,omitempty"`
+	Name                string                 `json:"name,omitempty"`
+	Description         string                 `json:"description,omitempty"`
+	BranchConfiguration string                 `json:"branch_configuration,omitempty"`
+	Provider            repositoryProvider     `json:"provider,omitempty"`
+	ProviderSettings    map[string]interface{} `json:"provider_settings,omitempty"`
+	Steps               []Step                 `json:"steps"`
 }
 
-type BuildkiteProvider struct {
-	Settings   map[string]interface{} `json:"settings"`
-	WebhookURL string                 `json:"webhook_url"`
+type repositoryProvider struct {
+	RepositoryProviderId string
+	Settings             map[string]interface{}
+	WebhookURL           string
+}
+
+var providerSettingsExcluded = [...]string{"repository", "account"}
+
+func (p repositoryProvider) MarshalJSON() ([]byte, error) {
+	// We only need to Unmarshall from the API
+	return []byte("null"), nil
+}
+
+func (p *repositoryProvider) UnmarshalJSON(data []byte) error {
+	var provider map[string]interface{}
+
+	if err := json.Unmarshal(data, &provider); err != nil {
+		return err
+	}
+
+	p.RepositoryProviderId = provider["id"].(string)
+	webhook, ok := provider["webhook_url"]
+	if ok {
+		p.WebhookURL = webhook.(string)
+	}
+
+	settings := provider["settings"].(map[string]interface{})
+
+	for _, k := range providerSettingsExcluded {
+		delete(settings, k)
+	}
+
+	p.Settings = settings
+
+	return nil
 }
 
 type Step struct {
@@ -189,9 +316,7 @@ func CreatePipeline(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	updatePipelineFromAPI(d, res)
-
-	return nil
+	return updatePipelineFromAPI(d, res)
 }
 
 func ReadPipeline(d *schema.ResourceData, meta interface{}) error {
@@ -211,9 +336,7 @@ func ReadPipeline(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	updatePipelineFromAPI(d, res)
-
-	return nil
+	return updatePipelineFromAPI(d, res)
 }
 
 func UpdatePipeline(d *schema.ResourceData, meta interface{}) error {
@@ -230,9 +353,7 @@ func UpdatePipeline(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	updatePipelineFromAPI(d, res)
-
-	return nil
+	return updatePipelineFromAPI(d, res)
 }
 
 func DeletePipeline(d *schema.ResourceData, meta interface{}) error {
@@ -245,9 +366,9 @@ func DeletePipeline(d *schema.ResourceData, meta interface{}) error {
 	return client.Delete([]string{"pipelines", slug})
 }
 
-func updatePipelineFromAPI(d *schema.ResourceData, p *Pipeline) {
+func updatePipelineFromAPI(d *schema.ResourceData, p *Pipeline) error {
 	d.SetId(p.Slug)
-	log.Printf("[INFO] Pipeline ID: %s", d.Id())
+	log.Printf("[INFO] buildkite: Pipeline ID: %s", d.Id())
 
 	d.Set("env", p.Environment)
 	d.Set("name", p.Name)
@@ -257,8 +378,6 @@ func updatePipelineFromAPI(d *schema.ResourceData, p *Pipeline) {
 	d.Set("slug", p.Slug)
 	d.Set("builds_url", p.BuildsURL)
 	d.Set("branch_configuration", p.BranchConfiguration)
-	d.Set("provider_settings", p.Provider.Settings)
-	d.Set("webhook_url", p.Provider.WebhookURL)
 	d.Set("default_branch", p.DefaultBranch)
 
 	stepMap := make([]interface{}, len(p.Steps))
@@ -276,7 +395,43 @@ func updatePipelineFromAPI(d *schema.ResourceData, p *Pipeline) {
 			"timeout_in_minutes":   element.TimeoutInMinutes,
 		}
 	}
-	d.Set("step", stepMap)
+	if err := d.Set("step", stepMap); err != nil {
+		return err
+	}
+
+	emptySettings := make([]interface{}, 0)
+	d.Set("github_settings", emptySettings)
+	d.Set("bitbucket_settings", emptySettings)
+
+	log.Printf("[INFO] buildkite: RepositoryProviderId: %s", p.Provider.RepositoryProviderId)
+
+	switch p.Provider.RepositoryProviderId {
+	case "github":
+		d.Set("webhook_url", p.Provider.WebhookURL)
+
+		log.Printf("[DEBUG] buildkite: Provider.Settings in github: %+v", p.Provider.Settings)
+		if err := d.Set("github_settings", []map[string]interface{}{p.Provider.Settings}); err != nil {
+			return err
+		}
+
+	case "bitbucket":
+		d.Set("webhook_url", p.Provider.WebhookURL)
+
+		log.Printf("[DEBUG] buildkite: Provider.Settings in bitbucket: %+v", p.Provider.Settings)
+		if err := d.Set("bitbucket_settings", []map[string]interface{}{p.Provider.Settings}); err != nil {
+			return err
+		}
+
+	case "gitlab":
+		d.Set("webhook_url", p.Provider.WebhookURL)
+
+	case "beanstalk":
+		d.Set("webhook_url", p.Provider.WebhookURL)
+
+	default: // unknown, noop
+	}
+
+	return nil
 }
 
 func preparePipelineRequestPayload(d *schema.ResourceData) *Pipeline {
@@ -291,10 +446,6 @@ func preparePipelineRequestPayload(d *schema.ResourceData) *Pipeline {
 	req.Environment = map[string]string{}
 	for k, vI := range d.Get("env").(map[string]interface{}) {
 		req.Environment[k] = vI.(string)
-	}
-	req.ProviderSettings = map[string]string{}
-	for k, vI := range d.Get("provider_settings").(map[string]interface{}) {
-		req.ProviderSettings[k] = vI.(string)
 	}
 
 	stepsI := d.Get("step").([]interface{})
@@ -322,6 +473,33 @@ func preparePipelineRequestPayload(d *schema.ResourceData) *Pipeline {
 		for j, vI := range stepM["agent_query_rules"].([]interface{}) {
 			req.Steps[i].AgentQueryRules[j] = vI.(string)
 		}
+	}
+
+	if d.HasChange("github_settings") || d.HasChange("bitbucket_settings") {
+		log.Printf("[INFO] buildkite: RepositoryProviderSettings have changed")
+
+		githubSettings := d.Get("github_settings").([]interface{})
+		bitbucketSettings := d.Get("bitbucket_settings").([]interface{})
+		settings := map[string]interface{}{}
+
+		if len(githubSettings) > 0 {
+			s := githubSettings[0].(map[string]interface{})
+
+			for k, vI := range s {
+				if _, ok := d.GetOk(fmt.Sprintf("github_settings.0.%s", k)); ok {
+					settings[k] = vI
+				}
+			}
+		} else if len(bitbucketSettings) > 0 {
+			s := bitbucketSettings[0].(map[string]interface{})
+
+			for k, vI := range s {
+				if _, ok := d.GetOk(fmt.Sprintf("bitbucket_settings.0.%s", k)); ok {
+					settings[k] = vI
+				}
+			}
+		}
+		req.ProviderSettings = settings
 	}
 
 	return req

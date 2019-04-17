@@ -78,6 +78,8 @@ func (c *Client) doRaw(req *http.Request) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer res.Body.Close()
+
 	log.Printf("[DEBUG] Buildkite Response %s\n", res.Status)
 
 	resBodyBytes, err := ioutil.ReadAll(res.Body)
@@ -99,8 +101,8 @@ func (c *Client) doRaw(req *http.Request) ([]byte, error) {
 func (c *Client) doJSON(method string, pathParts []string, reqBody, resBody interface{}) error {
 	var reqBodyBytes []byte
 	var err error
-	if resBody != nil {
-		reqBodyBytes, err = json.Marshal(reqBody)
+	if reqBody != nil {
+		reqBodyBytes, err = json.MarshalIndent(reqBody, "", "    ")
 		if err != nil {
 			return err
 		}
@@ -108,6 +110,7 @@ func (c *Client) doJSON(method string, pathParts []string, reqBody, resBody inte
 
 	req := c.createRawRequest(method, pathParts, reqBodyBytes)
 
+	log.Printf("[DEBUG] Buildkite Request Body %s\n", reqBodyBytes)
 	resBodyBytes, err := c.doRaw(req)
 	if err != nil {
 		return err

@@ -2,11 +2,14 @@ package buildkite
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 )
+
+var webhookRegexp = regexp.MustCompile("^https://webhook.buildkite.com/deliver/[a-zA-Z0-9]+$")
 
 func TestAccPipeline_basic_unknown(t *testing.T) {
 	resource.Test(t, resource.TestCase{
@@ -16,7 +19,12 @@ func TestAccPipeline_basic_unknown(t *testing.T) {
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccPipeline_basicUnknown,
-				Check:  testAccCheckBuildkitePipelineBasicAttributesFactory("unknown"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBuildkitePipelineBasicAttributesFactory("unknown"),
+					resource.TestCheckNoResourceAttr("buildkite_pipeline.test_unknown", "webhook_url"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_unknown", "github_settings.#", "0"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_unknown", "bitbucket_settings.#", "0"),
+				),
 			},
 		},
 	})
@@ -30,7 +38,13 @@ func TestAccPipeline_basic_beanstalk(t *testing.T) {
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccPipeline_basicBeanstalk,
-				Check:  testAccCheckBuildkitePipelineBasicAttributesFactory("beanstalk"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBuildkitePipelineBasicAttributesFactory("beanstalk"),
+					resource.TestCheckResourceAttrSet("buildkite_pipeline.test_beanstalk", "webhook_url"),
+					resource.TestMatchResourceAttr("buildkite_pipeline.test_beanstalk", "webhook_url", webhookRegexp),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_beanstalk", "github_settings.#", "0"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_beanstalk", "bitbucket_settings.#", "0"),
+				),
 			},
 		},
 	})
@@ -44,7 +58,24 @@ func TestAccPipeline_basic_github(t *testing.T) {
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccPipeline_basicGithub,
-				Check:  testAccCheckBuildkitePipelineBasicAttributesFactory("github"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBuildkitePipelineBasicAttributesFactory("github"),
+					resource.TestCheckResourceAttrSet("buildkite_pipeline.test_github", "webhook_url"),
+					resource.TestMatchResourceAttr("buildkite_pipeline.test_github", "webhook_url", webhookRegexp),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_github", "github_settings.#", "1"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_github", "github_settings.0.build_pull_request_forks", "false"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_github", "github_settings.0.build_pull_requests", "true"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_github", "github_settings.0.build_tags", "false"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_github", "github_settings.0.prefix_pull_request_fork_branch_names", "true"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_github", "github_settings.0.publish_blocked_as_pending", "false"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_github", "github_settings.0.publish_commit_status", "true"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_github", "github_settings.0.publish_commit_status_per_step", "false"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_github", "github_settings.0.pull_request_branch_filter_configuration", ""),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_github", "github_settings.0.pull_request_branch_filter_enabled", "false"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_github", "github_settings.0.skip_pull_request_builds_for_existing_commits", "true"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_github", "github_settings.0.trigger_mode", "code"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_github", "bitbucket_settings.#", "0"),
+				),
 			},
 		},
 	})
@@ -58,7 +89,20 @@ func TestAccPipeline_basic_bitbucket(t *testing.T) {
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccPipeline_basicBitbucket,
-				Check:  testAccCheckBuildkitePipelineBasicAttributesFactory("bitbucket"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBuildkitePipelineBasicAttributesFactory("bitbucket"),
+					resource.TestCheckResourceAttrSet("buildkite_pipeline.test_bitbucket", "webhook_url"),
+					resource.TestMatchResourceAttr("buildkite_pipeline.test_bitbucket", "webhook_url", webhookRegexp),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_bitbucket", "bitbucket_settings.#", "1"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_bitbucket", "bitbucket_settings.0.build_pull_requests", "true"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_bitbucket", "bitbucket_settings.0.build_tags", "false"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_bitbucket", "bitbucket_settings.0.publish_commit_status", "true"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_bitbucket", "bitbucket_settings.0.publish_commit_status_per_step", "false"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_bitbucket", "bitbucket_settings.0.pull_request_branch_filter_configuration", ""),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_bitbucket", "bitbucket_settings.0.pull_request_branch_filter_enabled", "false"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_bitbucket", "bitbucket_settings.0.skip_pull_request_builds_for_existing_commits", "true"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_bitbucket", "github_settings.#", "0"),
+				),
 			},
 		},
 	})
@@ -72,7 +116,78 @@ func TestAccPipeline_basic_gitlab(t *testing.T) {
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccPipeline_basicGitlab,
-				Check:  testAccCheckBuildkitePipelineBasicAttributesFactory("gitlab"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBuildkitePipelineBasicAttributesFactory("gitlab"),
+					resource.TestCheckResourceAttrSet("buildkite_pipeline.test_gitlab", "webhook_url"),
+					resource.TestMatchResourceAttr("buildkite_pipeline.test_gitlab", "webhook_url", webhookRegexp),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_gitlab", "github_settings.#", "0"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_gitlab", "bitbucket_settings.#", "0"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccPipeline_githubSettingsTriggerModeDeployment(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckBuildkitePipelineDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccPipeline_githubSettingsTriggerModeDeployment,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_foo", "github_settings.#", "1"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_foo", "github_settings.0.build_pull_request_forks", "false"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_foo", "github_settings.0.build_pull_requests", "false"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_foo", "github_settings.0.build_tags", "false"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_foo", "github_settings.0.prefix_pull_request_fork_branch_names", "false"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_foo", "github_settings.0.publish_blocked_as_pending", "false"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_foo", "github_settings.0.publish_commit_status", "false"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_foo", "github_settings.0.publish_commit_status_per_step", "false"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_foo", "github_settings.0.pull_request_branch_filter_configuration", ""),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_foo", "github_settings.0.pull_request_branch_filter_enabled", "false"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_foo", "github_settings.0.skip_pull_request_builds_for_existing_commits", "false"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_foo", "github_settings.0.trigger_mode", "deployment"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_foo", "bitbucket_settings.#", "0"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccPipeline_githubSettingsBuildTags(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckBuildkitePipelineDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccPipeline_githubSettingsBuildTags,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("buildkite_pipeline.test_foo", "webhook_url"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_foo", "github_settings.#", "1"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_foo", "github_settings.0.build_tags", "true"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_foo", "bitbucket_settings.#", "0"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccPipeline_bitbucketSettingsBuildTags(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckBuildkitePipelineDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccPipeline_bitbucketSettingsBuildTags,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_foo", "bitbucket_settings.#", "1"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_foo", "bitbucket_settings.0.build_tags", "true"),
+					resource.TestCheckResourceAttr("buildkite_pipeline.test_foo", "github_settings.#", "0"),
+				),
 			},
 		},
 	})
@@ -222,6 +337,57 @@ resource "buildkite_pipeline" "test_gitlab" {
     type = "script"
     name = "test"
     command = "echo 'Hello World'"
+  }
+}
+`
+
+const testAccPipeline_githubSettingsTriggerModeDeployment = `
+resource "buildkite_pipeline" "test_foo" {
+  name = "tf-acc-foo"
+  repository = "git@github.com:saymedia/terraform-provider-buildkite.git"
+
+  step {
+    type = "script"
+    name = "test"
+    command = "echo 'Hello World'"
+  }
+
+  github_settings {
+	trigger_mode = "deployment"
+  }
+}
+`
+
+const testAccPipeline_githubSettingsBuildTags = `
+resource "buildkite_pipeline" "test_foo" {
+  name = "tf-acc-foo"
+  repository = "git@github.com:saymedia/terraform-provider-buildkite.git"
+
+  step {
+    type = "script"
+    name = "test"
+    command = "echo 'Hello World'"
+  }
+
+  github_settings {
+	  build_tags = true
+  }
+}
+`
+
+const testAccPipeline_bitbucketSettingsBuildTags = `
+resource "buildkite_pipeline" "test_foo" {
+  name = "tf-acc-foo"
+  repository = "git@bitbucket.org:terraform-provider-buildkite/terraform-buildkite.git"
+
+  step {
+    type = "script"
+    name = "test"
+    command = "echo 'Hello World'"
+  }
+  
+  bitbucket_settings {
+	  build_tags = true
   }
 }
 `
