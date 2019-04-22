@@ -227,6 +227,10 @@ func resourcePipeline() *schema.Resource {
 							Type:     schema.TypeBool,
 							Optional: true,
 						},
+						"separate_pull_request_statuses": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
 					},
 				},
 			},
