@@ -497,9 +497,6 @@ func preparePipelineRequestPayload(d *schema.ResourceData) *Pipeline {
 				if d.HasChange(fmt.Sprintf("github_settings.0.%s", k)) {
 					settings[k] = vI
 				}
-				// if _, ok := d.GetOk(fmt.Sprintf("github_settings.0.%s", k)); ok {
-				// 	settings[k] = vI
-				// }
 			}
 		} else if len(bitbucketSettings) > 0 {
 			s := bitbucketSettings[0].(map[string]interface{})
@@ -508,9 +505,6 @@ func preparePipelineRequestPayload(d *schema.ResourceData) *Pipeline {
 				if d.HasChange(fmt.Sprintf("bitbucket_settings.0.%s", k)) {
 					settings[k] = vI
 				}
-				// if _, ok := d.GetOk(fmt.Sprintf("bitbucket_settings.0.%s", k)); ok {
-				// 	settings[k] = vI
-				// }
 			}
 		}
 		req.ProviderSettings = settings
