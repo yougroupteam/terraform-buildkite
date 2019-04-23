@@ -190,6 +190,7 @@ func resourcePipeline() *schema.Resource {
 						"build_pull_requests": &schema.Schema{
 							Type:     schema.TypeBool,
 							Optional: true,
+							Default:  true,
 						},
 						"pull_request_branch_filter_enabled": &schema.Schema{
 							Type:     schema.TypeBool,
@@ -202,6 +203,7 @@ func resourcePipeline() *schema.Resource {
 						"skip_pull_request_builds_for_existing_commits": &schema.Schema{
 							Type:     schema.TypeBool,
 							Optional: true,
+							Default:  true,
 						},
 						"build_pull_request_forks": &schema.Schema{
 							Type:     schema.TypeBool,
@@ -210,6 +212,7 @@ func resourcePipeline() *schema.Resource {
 						"prefix_pull_request_fork_branch_names": &schema.Schema{
 							Type:     schema.TypeBool,
 							Optional: true,
+							Default:  true,
 						},
 						"build_tags": &schema.Schema{
 							Type:     schema.TypeBool,
@@ -218,6 +221,7 @@ func resourcePipeline() *schema.Resource {
 						"publish_commit_status": &schema.Schema{
 							Type:     schema.TypeBool,
 							Optional: true,
+							Default:  true,
 						},
 						"publish_commit_status_per_step": &schema.Schema{
 							Type:     schema.TypeBool,
