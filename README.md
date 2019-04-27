@@ -2,12 +2,19 @@
 
 This allows you to manage buildkite pipelines with Terraform.
 
+## Originally forked from yougroupteam/terraform-buildkite
+
+This provider is originally forked from `yougroupteam/terraform-buildkite`. However, since there's no maintainer from `yougroupteam` anymore we have now duplicated the repo instead to ensure contributed changes can be adopted buy the community. 
+
+See [https://github.com/saymedia/terraform-buildkite/issues/25] for details.
+
+
 ## Installation
 
 Run
 ```bash
-go get github.com/saymedia/terraform-buildkite/terraform-provider-buildkite
-go install github.com/saymedia/terraform-buildkite/terraform-provider-buildkite
+go get github.com/yougroupteam/terraform-buildkite/terraform-provider-buildkite
+go install github.com/yougroupteam/terraform-buildkite/terraform-provider-buildkite
 ```
 Which gives you a `terraform-provider-buildkite` in `$GOPATH/bin`.
 
@@ -55,7 +62,7 @@ terraform import buildkite_pipeline.my_name my-pipeline-slug
 To do local development you will most likely be working in a Github fork of the repository. After creating your fork
 you can add it as a remote on your local repository in GOPATH:
 
-* `cd $GOPATH/src/github.com/saymedia/terraform-buildkite`
+* `cd $GOPATH/src/github.com/yougroupteam/terraform-buildkite`
 * `git remote add mine git@github.com:yourname/terraform-buildkite`
 * `git checkout -b yourbranch`
 * `git push -u mine yourbranch`
@@ -64,7 +71,7 @@ After this you should be able to `git push` to your fork, and eventually open a 
 
 You can build like this:
 
-* `go install github.com/saymedia/terraform-buildkite/terraform-provider-buildkite`
+* `go install github.com/yougroupteam/terraform-buildkite/terraform-provider-buildkite`
 
 This should produce a file at `$GOPATH/bin/terraform-provider-buildkite`. To use this with Terraform you'll need to move that binary to the [third-party plugins direcory](https://www.terraform.io/docs/plugins/basics.html#installing-a-plugin) to help Terraform find this file.
 
