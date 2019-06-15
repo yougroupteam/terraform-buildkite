@@ -209,6 +209,11 @@ func resourcePipeline() *schema.Resource {
 							Type:     schema.TypeBool,
 							Optional: true,
 						},
+						"filter_enabled": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
 						"prefix_pull_request_fork_branch_names": &schema.Schema{
 							Type:     schema.TypeBool,
 							Optional: true,
