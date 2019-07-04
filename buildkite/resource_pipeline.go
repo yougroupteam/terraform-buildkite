@@ -200,6 +200,11 @@ func resourcePipeline() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
+						"skip_builds_for_existing_commits": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
 						"skip_pull_request_builds_for_existing_commits": &schema.Schema{
 							Type:     schema.TypeBool,
 							Optional: true,
