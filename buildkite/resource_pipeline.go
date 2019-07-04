@@ -172,6 +172,10 @@ func resourcePipeline() *schema.Resource {
 							Optional: true,
 							Default:  false,
 						},
+						"upgraded_to_v2_hooks": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
 					},
 				},
 			},
@@ -199,6 +203,11 @@ func resourcePipeline() *schema.Resource {
 						"pull_request_branch_filter_configuration": &schema.Schema{
 							Type:     schema.TypeString,
 							Optional: true,
+						},
+						"skip_builds_for_existing_commits": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
 						},
 						"skip_pull_request_builds_for_existing_commits": &schema.Schema{
 							Type:     schema.TypeBool,
