@@ -4,7 +4,7 @@ This allows you to manage buildkite pipelines with Terraform.
 
 ## Originally forked from yougroupteam/terraform-buildkite
 
-This provider is originally forked from `yougroupteam/terraform-buildkite`. However, since there's no maintainer from `yougroupteam` anymore we have now duplicated the repo instead to ensure contributed changes can be adopted buy the community. 
+This provider is originally forked from `saymedia/terraform-buildkite`. However, since there's no maintainer from `saymedia` anymore we have now duplicated the repo instead to ensure contributed changes can be adopted buy the community. 
 
 See [https://github.com/saymedia/terraform-buildkite/issues/25] for details.
 

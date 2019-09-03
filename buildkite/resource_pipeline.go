@@ -172,6 +172,10 @@ func resourcePipeline() *schema.Resource {
 							Optional: true,
 							Default:  false,
 						},
+						"upgraded_to_v2_hooks": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
 					},
 				},
 			},
@@ -200,6 +204,11 @@ func resourcePipeline() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
+						"skip_builds_for_existing_commits": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
 						"skip_pull_request_builds_for_existing_commits": &schema.Schema{
 							Type:     schema.TypeBool,
 							Optional: true,
@@ -208,6 +217,11 @@ func resourcePipeline() *schema.Resource {
 						"build_pull_request_forks": &schema.Schema{
 							Type:     schema.TypeBool,
 							Optional: true,
+						},
+						"filter_enabled": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
 						},
 						"prefix_pull_request_fork_branch_names": &schema.Schema{
 							Type:     schema.TypeBool,
