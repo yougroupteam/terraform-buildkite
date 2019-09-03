@@ -13,8 +13,8 @@ See [https://github.com/saymedia/terraform-buildkite/issues/25] for details.
 
 Run
 ```bash
-go get github.com/yougroupteam/terraform-buildkite/terraform-provider-buildkite
-go install github.com/yougroupteam/terraform-buildkite/terraform-provider-buildkite
+go get github.com/yougroupteam/terraform-buildkite
+go install github.com/yougroupteam/terraform-buildkite
 ```
 Which gives you a `terraform-provider-buildkite` in `$GOPATH/bin`.
 
