@@ -196,6 +196,11 @@ func resourcePipeline() *schema.Resource {
 							Optional: true,
 							Default:  true,
 						},
+						"build_pull_request_ready_for_review": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
 						"pull_request_branch_filter_enabled": &schema.Schema{
 							Type:     schema.TypeBool,
 							Optional: true,
