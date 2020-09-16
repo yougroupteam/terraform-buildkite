@@ -254,6 +254,10 @@ func resourcePipeline() *schema.Resource {
 							Optional: true,
 							Default:  true,
 						},
+						"build_branches": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
 						"build_tags": &schema.Schema{
 							Type:     schema.TypeBool,
 							Optional: true,
