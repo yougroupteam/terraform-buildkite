@@ -244,6 +244,10 @@ func resourcePipeline() *schema.Resource {
 							Type:     schema.TypeBool,
 							Optional: true,
 						},
+						"build_pull_request_labels_changed": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
 						"filter_enabled": &schema.Schema{
 							Type:     schema.TypeBool,
 							Optional: true,
