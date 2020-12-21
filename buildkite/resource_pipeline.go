@@ -253,6 +253,11 @@ func resourcePipeline() *schema.Resource {
 							Optional: true,
 							Default:  false,
 						},
+						"use_step_key_as_commit_status": &schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
 						"prefix_pull_request_fork_branch_names": &schema.Schema{
 							Type:     schema.TypeBool,
 							Optional: true,
